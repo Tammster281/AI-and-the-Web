@@ -1,5 +1,7 @@
 import streamlit as st
 
-st.title("Hello world")
+page1 = st.Page("first_test.py", title="The first page", icon="🤔")
+page2 = st.Page("08-page2.py", title="The second page", icon="📈")
 
-st.write("This is my first web app.")
+pg = st.navigation(pages=[page1, page2])
+pg.run()
