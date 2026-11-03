@@ -19,30 +19,35 @@ with st.form("text_form"):
     submitted = st.form_submit_button("Submit")
 
 guess_marked = []
+letter_used=[]
 if submitted:
     st.write(f"You submitted: {guess}")
-    # Run your calculation or other action here.
+    
+    for i in range (len(guess)):
+        letter_used.append(0)
+
+    # Abgleichen des guesses mit dem gesuchten wort, entsprechendes färben der buchstaben
     for buchstabe in range(len(guess)):
         b1 = guess[buchstabe]
         b2 = st.session_state["word"][buchstabe]
-        count=0
+
+        #count=0
         if b1 == b2:
-         #   st.write(f":green[{b1}]")
             guess_marked.append(f":green[{b1}]")
+            letter_used[buchstabe]=1
+
         else:
-            for buchstabe in range(len(guess)):
-                if b1 == st.session_state["word"][buchstabe]:
-                    #st.write(f":blue[{b1}]")
-                    #break
-                    count = count + 1
-            if count > 0:   
-             #   st.write(f":blue[{b1}]")
-                guess_marked.append(f":yellow[{b1}]")
-                count = 0
-            else:   
-             #   st.write(f":red[{b1}]")
+            l_found = False
+            for i in range(len(st.session_state["word"])):
+                if b1 == st.session_state["word"][i] and letter_used[i]==0 and guess[i]!=st.session_state["word"][i]:
+                    guess_marked.append(f":yellow[{b1}]")
+                    letter_used[i]=1
+                    l_found = True
+                    break
+
+            if not l_found:
                 guess_marked.append(f":red[{b1}]")
-                count = 0
+
     st.markdown(" ".join(guess_marked))
     if guess == st.session_state['word']:
         st.success("Yeah! You did it")
