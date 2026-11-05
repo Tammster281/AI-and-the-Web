@@ -4,11 +4,7 @@ from openai import OpenAI, AuthenticationError, OpenAIError
 
 with st.sidebar:
     api_key = "sk-W_byX2pDUK-eKqf5XjMerg"
-      #  "UOS AI API-Key",
-       # type="password",
-        #key="uos_api_key",
-      #  placeholder="sk-...",
-   # ).strip()
+
 
 if not api_key:
     st.info("Please enter your Uni Osnabrück API key. If you don't have one, you can obtain it from https://ai-keys.uni-osnabrueck.de.")
@@ -19,9 +15,15 @@ client = OpenAI(
     base_url="https://litellm.uni-osnabrueck.de/v1",
     api_key=api_key
 )
-prompt = ("generate a real random 6 letter word with only small letters")
-x=1
-if "word" not in st.session_state: #st.button("Submit", disabled=not prompt.strip()):
+
+#Wortlänge wird mit slider festgelegt
+wortlaenge = st.slider("Wortlänge:", min_value=3, max_value=8, value=5)
+st.subheader("Wortlänge")
+st.write(f"Wortlänge is {wortlaenge}")
+#AI soll Wort nach dem Prompt später generieren
+prompt = (f"Generate ONE real, existing dictionary word with exactly {wortlaenge} letters in all lowercase. Output ONLY the word and nothing else.")
+
+if st.button("Generate Word") :#Wenn auf Button geklickt wird, Generiert AI ein Wort nach dem Prompt
     try:
         with st.spinner("Answer is being created …"):
             response = client.chat.completions.create(
@@ -30,12 +32,9 @@ if "word" not in st.session_state: #st.button("Submit", disabled=not prompt.stri
                     {"role": "user", "content": prompt},
                 ],
             )
-
-        st.write(response.choices[0].message.content)
-        ai_antwort = response.choices[0].message.content.strip()
-        #st.write(ai_antwort)
-       # x=0
-
+        st.session_state["word"] = response.choices[0].message.content.strip()
+       # st.session_state["word_generated"] = True
+        st.write (st.session_state["word"])
     except AuthenticationError:
         st.error("API was not accept. Please check it.")
 
@@ -44,19 +43,13 @@ if "word" not in st.session_state: #st.button("Submit", disabled=not prompt.stri
             "AI API request failed. Please check it and try again. "
         )
 
-# If you want Streamlit's built-in colored text rendering:
+
 st.header("P:red[y]t:blue[ho]n")
 
-# create a new random number if we don't have one yet
-if "word" not in st.session_state:
-    words = ["python", "coding", "skater", "header"]
-    st.session_state["word"] =ai_antwort
-    print(st.info("New word generated!"))
-st.write (st.session_state["word"])
 
 with st.form("text_form"):
     guess = st.text_input(
-        "Enter a 6 letter word",
+        f"Enter a {wortlaenge} letter word",
 
     )
     submitted = st.form_submit_button("Submit")
@@ -94,6 +87,7 @@ if submitted:
     st.markdown(" ".join(guess_marked))
     if guess == st.session_state['word']:
         st.success("Yeah! You did it")
+        st.balloons()
        # del st.session_state['word']
     else:
         st.error("Oh no. The word is wrong.")
