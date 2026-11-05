@@ -1,15 +1,15 @@
 import streamlit as st
 
-st.header("Page 1")
+st.header("Wordle")
 
 st.markdown("""
 
-This is the text for page 1.
+Normal Game
 
 ## Use markdown in Streamlit.
 
 Just use `markdown`syntax for longer texts.
 """)
 
-if st.button("Go to page 2"):
+if st.button("Go to Statistics"):
     st.switch_page("08-page2.py")
