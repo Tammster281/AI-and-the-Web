@@ -1,7 +1,5 @@
 import streamlit as st
 
-st.header("Statistics")
+st.header("Statistics :t-rex:")
 
-st.markdown("""
-Statistics.
-""")
+st.markdown(st.session_state["stats"])
