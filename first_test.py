@@ -23,6 +23,7 @@ st.write(f"Wortlänge is {wortlaenge}")
 #AI soll Wort nach dem Prompt später generieren
 prompt = (f"Generate ONE real, existing dictionary word with exactly {wortlaenge} letters in all lowercase. Output ONLY the word and nothing else.")
 
+
 if st.button("Generate Word") :#Wenn auf Button geklickt wird, Generiert AI ein Wort nach dem Prompt
     try:
         with st.spinner("Answer is being created …"):
@@ -35,6 +36,7 @@ if st.button("Generate Word") :#Wenn auf Button geklickt wird, Generiert AI ein 
         st.session_state["word"] = response.choices[0].message.content.strip()
        # st.session_state["word_generated"] = True
         st.write (st.session_state["word"])
+        st.session_state["word_list"] = [] # es wird eine liste angelegt in der später alle guesses gespeichert werden
     except AuthenticationError:
         st.error("API was not accept. Please check it.")
 
@@ -83,8 +85,9 @@ if submitted:
 
             if not l_found:
                 guess_marked.append(f":red[{b1}]")
-
-    st.markdown(" ".join(guess_marked))
+    st.session_state["word_list"].append(" ".join(guess_marked))
+    for a in st.session_state["word_list"]:
+        st.markdown(a)
     if guess == st.session_state['word']:
         st.success("Yeah! You did it")
         st.balloons()
