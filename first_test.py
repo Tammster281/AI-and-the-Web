@@ -4,9 +4,10 @@ import random
 # If you want Streamlit's built-in colored text rendering:
 st.header("P:red[y]t:blue[ho]n")
 
-# create a new random number if we don't have one yet
+# create a new random word if we don't have one yet
+words = ["python", "coding", "skater", "header"]
 if "word" not in st.session_state:
-    words = ["python", "coding", "skater", "header"]
+   
     st.session_state["word"] =random.choice(words)
     print(st.info("New word generated!"))
 st.write (st.session_state["word"])
@@ -55,3 +56,7 @@ if submitted:
     else:
         st.error("Oh no. The word is wrong.")
         st.info(f"Debug info: The word is {st.session_state['word']}")
+if st.button("new_word"):
+    st.info("New word has been generated!")
+    st.balloons()
+    st.session_state["word"] =random.choice(words)
