@@ -5,3 +5,4 @@ page2 = st.Page("wordle_statistics.py", title="Statistics", icon="📈")
 
 pg = st.navigation(pages=[page1, page2])
 pg.run()
+#test funktioniert diese github
