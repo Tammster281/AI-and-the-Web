@@ -44,7 +44,6 @@ if "stats" not in st.session_state:
             6: 0,
         }  
     }
-#fdghfn
 # If there is no word yet or the button gets clicked, the AI generates a word
 # remove the comment and the ":" in between in the "if"-line to generate the word immediately
 # TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing
@@ -54,17 +53,14 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
             resp = client.chat.completions.create(
             model="Qwen/Qwen3.8-27B-FP8",
             max_tokens=1000,
-            messages=[{"role": "user", "content": prompt}],# a spinner while the model is generating
-            
-                
-            )
-        st.session_state["word"] = resp.choices[0].message.content.strip()
+            messages=[{"role": "user", "content": prompt}],# a spinner while the model is generating      
+                )
+            st.session_state["word"] = resp.choices[0].message.content.strip()
         st.session_state["guess_counter"] = 0
         st.session_state["solved"] = False
         st.session_state["stats"]["games_played"] += 1
         # st.session_state["word_generated"] = True
         st.write (st.session_state["word"])
-        st.balloons()
         st.session_state["word_list"] = [] # a list gets created in which all guesses are saved later
     except AuthenticationError:
         st.error("API was not accept. Please check it.")
@@ -75,20 +71,30 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
         )
 
 # Write "Python" in a fixed red, blue and white way
-st.header("P:red[y]t:blue[ho]n")
-
+st.header("Wordle")
+stop = False
 # TODO: add comment
-with st.form("text_form"):
-    guess = st.text_input(
+with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True):
+    
+    guess_ungereinigt = st.text_input(   
         f"Enter a {wortlaenge} letter word",
 
     )
     submitted = st.form_submit_button("Submit")
+    if submitted:
+        guess = guess_ungereinigt.strip().lower() #removes spaces and makes everything lower letters
+
+        if guess not in nouns or len(guess) != len(st.session_state["word"]): #if the word is not an actual word or wrong length,
+            #st.error("Dieses Wort ist nicht in der Wörterliste erlaubt!")     #it is not supposed to keep using it so stop = True
+            stop = True
+            for a in st.session_state["word_list"]: #the list of allready tiped words should still be shows
+                st.markdown(a)
+
 
 # if the Submit button was pressed and the word wasn't guessed yet, increase the guess counter
 guess_marked = []
 letter_used=[]
-if submitted and not st.session_state["solved"]:
+if submitted and not st.session_state["solved"] and stop == False:
     
     st.session_state["guess_counter"] += 1
 
