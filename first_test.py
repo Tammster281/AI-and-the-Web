@@ -28,7 +28,7 @@ wortlaenge = st.slider("Wortlänge:", min_value=3, max_value=8, value=5)
 st.subheader("Wortlänge")
 st.write(f"Wortlänge is {wortlaenge}")
 # prompt for the AI to generate a word later
-prompt = (f"Generate ONE real, existing dictionary word with exactly {wortlaenge} letters in all lowercase. Output ONLY the word and nothing else.")
+prompt = (f"Generate ONE real, existing dictionary word with exactly {wortlaenge} letters about animals in all lowercase. Output ONLY the word and nothing else.")
 
 # create session state for the statistics if it doesn't exist already
 if "stats" not in st.session_state:
@@ -50,14 +50,15 @@ if "stats" not in st.session_state:
 # TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing
 if st.button("Generate new Word") : # or "word" not in st.session_state: 
     try:
-        with st.spinner("Answer is being created …"): # a spinner while the model is generating
-            response = client.chat.completions.create(
-                model="google/gemma-4-E4B-it",
-                messages=[
-                    {"role": "user", "content": prompt},
-                ],
+        with st.spinner("Answer is being created …"): 
+            resp = client.chat.completions.create(
+            model="Qwen/Qwen3.8-27B-FP8",
+            max_tokens=1000,
+            messages=[{"role": "user", "content": prompt}],# a spinner while the model is generating
+            
+                
             )
-        st.session_state["word"] = response.choices[0].message.content.strip()
+        st.session_state["word"] = resp.choices[0].message.content.strip()
         st.session_state["guess_counter"] = 0
         st.session_state["solved"] = False
         st.session_state["stats"]["games_played"] += 1
