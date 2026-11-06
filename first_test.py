@@ -40,7 +40,7 @@ if "stats" not in st.session_state:
             6: 0,
         }  
     }
-
+#fdghfn
 # If there is no word yet or the button gets clicked, the AI generates a word
 # remove the comment and the ":" in between in the "if"-line to generate the word immediately
 # TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing
