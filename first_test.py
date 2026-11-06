@@ -4,9 +4,9 @@ from openai import OpenAI, AuthenticationError, OpenAIError
 #import pandas as pd
 #import numpy as np
 
+# api key, hide later?
 with st.sidebar:
     api_key = "sk-W_byX2pDUK-eKqf5XjMerg"
-
 
 if not api_key:
     st.info("Please enter your Uni Osnabrück API key. If you don't have one, you can obtain it from https://ai-keys.uni-osnabrueck.de.")
@@ -19,14 +19,14 @@ client = OpenAI(
 )
 
 
-#Wortlänge wird mit slider festgelegt
+# word length gets chosen with a slider
 wortlaenge = st.slider("Wortlänge:", min_value=3, max_value=8, value=5)
 st.subheader("Wortlänge")
 st.write(f"Wortlänge is {wortlaenge}")
-#AI soll Wort nach dem Prompt später generieren
+# prompt for the AI to generate a word later
 prompt = (f"Generate ONE real, existing dictionary word with exactly {wortlaenge} letters in all lowercase. Output ONLY the word and nothing else.")
 
-
+# create session state for the statistics if it doesn't exist already
 if "stats" not in st.session_state:
     st.session_state["stats"] = {
         "games_played": 0,
@@ -41,10 +41,12 @@ if "stats" not in st.session_state:
         }  
     }
 
-
-if "word" not in st.session_state or st.button("Generate new Word") :#Wenn auf Button geklickt wird, Generiert AI ein Wort nach dem Prompt
+# If there is no word yet or the button gets clicked, the AI generates a word
+# remove the comment and the ":" in between in the "if"-line to generate the word immediately
+# TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing
+if st.button("Generate new Word") : # or "word" not in st.session_state: 
     try:
-        with st.spinner("Answer is being created …"):
+        with st.spinner("Answer is being created …"): # a spinner while the answer is generating
             response = client.chat.completions.create(
                 model="google/gemma-4-E4B-it",
                 messages=[
@@ -55,10 +57,10 @@ if "word" not in st.session_state or st.button("Generate new Word") :#Wenn auf B
         st.session_state["guess_counter"] = 0
         st.session_state["solved"] = False
         st.session_state["stats"]["games_played"] += 1
-       # st.session_state["word_generated"] = True
+        # st.session_state["word_generated"] = True
         st.write (st.session_state["word"])
         st.balloons()
-        st.session_state["word_list"] = [] # es wird eine liste angelegt in der später alle guesses gespeichert werden
+        st.session_state["word_list"] = [] # a list gets created in which all guesses are saved later
     except AuthenticationError:
         st.error("API was not accept. Please check it.")
 
@@ -67,8 +69,6 @@ if "word" not in st.session_state or st.button("Generate new Word") :#Wenn auf B
             "AI API request failed. Please check it and try again. "
         )
 
-
-  
 
 st.header("P:red[y]t:blue[ho]n")
 
