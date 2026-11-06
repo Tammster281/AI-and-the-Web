@@ -23,12 +23,23 @@ client = OpenAI(
     api_key=api_key
 )
 
+st.header("Wordle")
+
+word_difficulty = st.select_slider(
+    "choose word difficulty:",
+    options=["easy", "normal", "hard",],
+    value="normal")
 # word length gets chosen with a slider
 wortlaenge = st.slider("Wortlänge:", min_value=3, max_value=8, value=5)
-st.subheader("Wortlänge")
-st.write(f"Wortlänge is {wortlaenge}")
+with st.form("text", clear_on_submit=False, enter_to_submit=True, border=True):
+    word_topic = st.text_input(   
+        f"Enter a wordtopic"
+
+    )
+    submitted = st.form_submit_button("Submit")
+
 # prompt for the AI to generate a word later
-prompt = (f"Generate ONE real, existing dictionary word with exactly {wortlaenge} letters about animals in all lowercase. Output ONLY the word and nothing else.")
+prompt = (f"Generate ONE real, existing dictionary word with the topic {word_topic} with exactly {wortlaenge} letters in all lowercase {word_difficulty} to guess. Output ONLY the word and nothing else.")
 
 # create session state for the statistics if it doesn't exist already
 if "stats" not in st.session_state:
@@ -70,8 +81,7 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
             "AI API request failed. Please check it and try again. "
         )
 
-# Write "Python" in a fixed red, blue and white way
-st.header("Wordle")
+
 stop = False
 # TODO: add comment
 with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True):
