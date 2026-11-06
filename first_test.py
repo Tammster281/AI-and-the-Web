@@ -4,7 +4,8 @@ from openai import OpenAI, AuthenticationError, OpenAIError
 #import pandas as pd
 #import numpy as np
 
-# api key, hide later?
+# api key
+# TODO: have user input the key themselves later!
 with st.sidebar:
     api_key = "sk-W_byX2pDUK-eKqf5XjMerg"
 
@@ -17,7 +18,6 @@ client = OpenAI(
     base_url="https://litellm.uni-osnabrueck.de/v1",
     api_key=api_key
 )
-
 
 # word length gets chosen with a slider
 wortlaenge = st.slider("Wortlänge:", min_value=3, max_value=8, value=5)
@@ -46,7 +46,7 @@ if "stats" not in st.session_state:
 # TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing
 if st.button("Generate new Word") : # or "word" not in st.session_state: 
     try:
-        with st.spinner("Answer is being created …"): # a spinner while the answer is generating
+        with st.spinner("Answer is being created …"): # a spinner while the model is generating
             response = client.chat.completions.create(
                 model="google/gemma-4-E4B-it",
                 messages=[
@@ -69,10 +69,10 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
             "AI API request failed. Please check it and try again. "
         )
 
-
+# Write "Python" in a fixed red, blue and white way
 st.header("P:red[y]t:blue[ho]n")
 
-
+# TODO: add comment
 with st.form("text_form"):
     guess = st.text_input(
         f"Enter a {wortlaenge} letter word",
@@ -80,6 +80,7 @@ with st.form("text_form"):
     )
     submitted = st.form_submit_button("Submit")
 
+# if the Submit button was pressed and the word wasn't guessed yet, increase the guess counter
 guess_marked = []
 letter_used=[]
 if submitted and not st.session_state["solved"]:
