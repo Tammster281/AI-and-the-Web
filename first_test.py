@@ -3,7 +3,11 @@ import random
 from openai import OpenAI, AuthenticationError, OpenAIError
 #import pandas as pd
 #import numpy as np
+import json
 
+# JSON-Datei laden
+with open('2of12id.json', 'r') as file:
+    nouns = json.load(file)['N']
 # api key
 # TODO: have user input the key themselves later!
 with st.sidebar:
