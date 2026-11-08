@@ -22,10 +22,13 @@ client = OpenAI(
     base_url="https://litellm.uni-osnabrueck.de/v1",
     api_key=api_key
 )
-
+if "word_generated" not in st.session_state: #these variables should allready exist but not turn false everytime the website gets an input
+    st.session_state["word_generated"] = False
+if "solved" not in st.session_state:
+    st.session_state["solved"] = False
 st.header("Wordle")
 
-word_difficulty = st.select_slider(
+word_difficulty = st.select_slider( #slider to adjust word difficulty 
     "choose word difficulty:",
     options=["easy", "normal", "hard",],
     value="normal")
@@ -39,7 +42,7 @@ with st.form("text", clear_on_submit=False, enter_to_submit=True, border=True):
     submitted = st.form_submit_button("Submit")
 
 # prompt for the AI to generate a word later
-prompt = (f"Generate ONE real, existing dictionary word with the topic {word_topic} with exactly {wortlaenge} letters in all lowercase {word_difficulty} to guess. Output ONLY the word and nothing else.")
+prompt = (f"Generate ONE real, existing dictionary word with the topic {word_topic} with exactly {wortlaenge} letters {word_difficulty} to guess. Output ONLY the word and nothing else.")
 
 # create session state for the statistics if it doesn't exist already
 if "stats" not in st.session_state:
@@ -66,11 +69,11 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
             max_tokens=1000,
             messages=[{"role": "user", "content": prompt}],# a spinner while the model is generating      
                 )
-            st.session_state["word"] = resp.choices[0].message.content.strip()
+            st.session_state["word"] = resp.choices[0].message.content.strip().upper()
         st.session_state["guess_counter"] = 0
         st.session_state["solved"] = False
         st.session_state["stats"]["games_played"] += 1
-        # st.session_state["word_generated"] = True
+        st.session_state["word_generated"] = True
         st.write (st.session_state["word"])
         st.session_state["word_list"] = [] # a list gets created in which all guesses are saved later
     except AuthenticationError:
@@ -80,7 +83,32 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
         st.error(
             "AI API request failed. Please check it and try again. "
         )
+#Button to get a hint
+if st.button("Hint") and st.session_state["solved"] == False and st.session_state["word_generated"] == True:
+    if st.session_state["guess_counter"] > 3: #only after a few guess should you be able to get a hint
+        hint = f"give a riddle to guess {st.session_state['word']} without saying {st.session_state['word']}"
+        try:
+            with st.spinner("Answer is being created …"): 
+                resp = client.chat.completions.create(
+                model="Qwen/Qwen3.8-27B-FP8",
+                max_tokens=1000,
+                messages=[{"role": "user", "content": hint}],# a spinner while the model is generating      
+                        )
+                st.session_state["hint"] = resp.choices[0].message.content
+                st.write (st.session_state["hint"])
 
+                        
+        except AuthenticationError:
+            st.error("API was not accept. Please check it.")
+
+        except OpenAIError:
+            st.error(
+                "AI API request failed. Please check it and try again. "
+            )
+    else:
+        st.write("Come on, try a few times first!")
+    for a in st.session_state["word_list"]: #the list of allready tiped words should still be shows
+        st.markdown(a)
 
 stop = False
 # TODO: add comment
@@ -91,13 +119,13 @@ with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True
 
     )
     submitted = st.form_submit_button("Submit")
-    if submitted:
-        guess = guess_ungereinigt.strip().lower() #removes spaces and makes everything lower letters
+    if submitted and st.session_state["solved"] == False:
+        guess = guess_ungereinigt.strip().upper() #removes spaces and makes everything upper letters
 
-        if guess not in nouns or len(guess) != len(st.session_state["word"]): #if the word is not an actual word or wrong length,
-            #st.error("Dieses Wort ist nicht in der Wörterliste erlaubt!")     #it is not supposed to keep using it so stop = True
+        if guess.lower() not in nouns or len(guess) != len(st.session_state["word"]): #if the word is not an actual word or wrong length,
+            st.error("Enter valid word!")     #it is not supposed to keep using it so stop = True
             stop = True
-            for a in st.session_state["word_list"]: #the list of allready tiped words should still be shows
+            for a in st.session_state["word_list"]: #the list of allready tiped words should still be shown
                 st.markdown(a)
 
 
@@ -147,6 +175,7 @@ if submitted and not st.session_state["solved"] and stop == False:
                 st.session_state["stats"]["games_won"] += 1
                 st.session_state["stats"]["game_guesses"][st.session_state["guess_counter"]] += 1
             st.session_state["solved"] = True
+
 
             
         # del st.session_state['word']
