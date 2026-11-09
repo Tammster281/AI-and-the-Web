@@ -98,7 +98,7 @@ if st.button("Hint") and st.session_state["solved"] == False and st.session_stat
                 st.write (st.session_state["hint"])
 
                         
-        except AuthenticationError:
+        except AuthenticationError: #TODO: anderer error machen
             st.error("API was not accept. Please check it.")
 
         except OpenAIError:
