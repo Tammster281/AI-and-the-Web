@@ -178,7 +178,7 @@ with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True
         guess = guess_ungereinigt.strip().upper() # removes spaces and makes everything upper letters
 
         if guess.lower() not in nouns or len(guess) != len(st.session_state["word"]): # if the word is not an actual word or wrong length,
-            st.error("Enter valid word!")     # it is not supposed to keep using it so stop = True
+            st.error("Enter valid word!:confounded:")     # it is not supposed to keep using it so stop = True
             stop = True
             for a in st.session_state["word_list"]: # the list of already typed words should still be shown
                 st.markdown(a)
@@ -227,7 +227,7 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
             st.markdown(a)
 
         if guess == st.session_state['word']:
-            st.success("Yeah! You did it")
+            st.success("Yeah! You did it:partying::partying:")
             st.balloons()
             # first solve will be saved in "stats":
             if not st.session_state["solved"]:
@@ -237,7 +237,7 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
             
         # del st.session_state['word']
         else:
-            st.error("Oh no. The word is wrong.")
+            st.error("Oh no. The word is wrong.:dizzy_face:")
             st.info(f"Debug info: The word is {st.session_state['word']}")
     else:
-        st.error("You have used up all your guesses." +f"Debug info: The word was {st.session_state['word']}" + "Please generate a new word and try again.")
+        st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}" + "Please generate a new word and try again.")
