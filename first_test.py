@@ -9,21 +9,31 @@ import json
 with open('2of12id.json', 'r') as file:
     nouns = json.load(file)['N']
 
-# api key
-# TODO: have user input the key themselves later!
+# api key input
+if not "api_key" in st.session_state:
+    st.session_state["api_key"] = ""
 with st.sidebar:
-    api_key = "sk-W_byX2pDUK-eKqf5XjMerg"
+    with st.form("api_key_form", clear_on_submit=False, enter_to_submit=False):
+        #api_key = st.text_input(f"Enter your API key", value=st.session_state.get("api_key", "")) # TODO: keep this line! uncomment when launching the website
+        api_key = st.text_input(f"Enter your API key", value="sk-W_byX2pDUK-eKqf5XjMerg") # TODO: just for convenience while debugging, before launching the website, remove this line. Comment out when using the above line for testing.
+        submit_key = st.form_submit_button("Enter")
 
-if not api_key:
+# this must stay in, otherwise it deletes the session state if it is only written on in the form when you switch pages
+if submit_key:
+    st.session_state["api_key"] = api_key
+
+# if there is no API key yet, info about that
+if not st.session_state["api_key"]:
     st.info("Please enter your Uni Osnabrück API key. If you don't have one, you can obtain it from https://ai-keys.uni-osnabrueck.de.")
     st.stop()
 
 # pass the entered key
 client = OpenAI(
     base_url="https://litellm.uni-osnabrueck.de/v1",
-    api_key=api_key
+    api_key=st.session_state["api_key"]
 )
-if "word_generated" not in st.session_state: # these variables should allready exist but not turn false everytime the website gets an input
+
+if "word_generated" not in st.session_state: # these variables should already exist but not turn false everytime the website gets an input
     st.session_state["word_generated"] = False
 if "solved" not in st.session_state:
     st.session_state["solved"] = False
@@ -46,7 +56,7 @@ with st.form("text", clear_on_submit=False, enter_to_submit=True, border=True):
     submitted = st.form_submit_button("Submit")
 
 # prompt for the AI to generate a word later
-prompt = (f"Generate ONE real, existing dictionary word with the topic {word_topic} with exactly {wortlaenge} letters {word_difficulty} to guess. Output ONLY the word and nothing else.")
+prompt = (f"Generate ONE real, existing dictionary word with the topic '{word_topic}' with exactly {wortlaenge} letters with a {word_difficulty} difficulty to guess. Output ONLY the word and nothing else.")
 
 # create session state for the statistics if it doesn't exist already
 if "stats" not in st.session_state:
@@ -65,7 +75,7 @@ if "stats" not in st.session_state:
 
 # (If there is no word yet or) the button gets clicked, the AI generates a word
 # remove the comment and the ":" in between in the "if"-line to generate the word immediately
-# TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing
+# TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing. See if we still need it at all.
 if st.button("Generate new Word") : # or "word" not in st.session_state: 
     try:
         with st.spinner("Answer is being created …"): 
