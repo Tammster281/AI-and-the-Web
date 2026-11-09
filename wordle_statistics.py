@@ -4,6 +4,10 @@ import numpy as np
 
 st.header("Statistics :t-rex:")
 
+word_difficulty = st.select_slider( 
+    "choose difficulty:",
+    options=["easy", "normal", "hard",],
+    value="normal")
 
 st.markdown(st.session_state["stats"])
 
@@ -11,8 +15,8 @@ st.markdown(st.session_state["stats"])
 df = pd.DataFrame({
     "Stat": ["Games", "Won"],
     "Count": [
-        st.session_state["stats"]["games_played"],
-        st.session_state["stats"]["games_won"]
+        st.session_state["stats"][word_difficulty]["games_played"],
+        st.session_state["stats"][word_difficulty]["games_won"]
     ]
 })
 
@@ -23,8 +27,8 @@ st.bar_chart(
 )
 
 df = pd.DataFrame({
-    "Guesses": list(st.session_state["stats"]["game_guesses"].keys()),
-    "Count": list(st.session_state["stats"]["game_guesses"].values())
+    "Guesses": list(st.session_state["stats"][word_difficulty]["game_guesses"].keys()),
+    "Count": list(st.session_state["stats"][word_difficulty]["game_guesses"].values())
 })
 
 st.bar_chart(

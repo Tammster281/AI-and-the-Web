@@ -46,6 +46,7 @@ word_difficulty = st.select_slider(
     options=["easy", "normal", "hard",],
     value="normal")
 
+
 # word length gets chosen with a slider
 wortlaenge = st.slider("Wortlänge:", min_value=3, max_value=8, value=5)
 with st.form("text", clear_on_submit=False, enter_to_submit=True, border=True):
@@ -61,16 +62,42 @@ prompt = (f"Generate ONE real, existing dictionary word with the topic '{word_to
 # create session state for the statistics if it doesn't exist already
 if "stats" not in st.session_state:
     st.session_state["stats"] = {
-        "games_played": 0,
-        "games_won": 0,
-        "game_guesses": {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-        }  
+        "easy":{
+            "games_played": 0,
+            "games_won": 0,
+            "game_guesses": {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0,
+            }  
+        },
+        "normal":{
+            "games_played": 0,
+            "games_won": 0,
+            "game_guesses": {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0,
+            }  
+        },
+        "hard":{
+            "games_played": 0,
+            "games_won": 0,
+            "game_guesses": {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0,
+            }  
+        }
     }
 
 # (If there is no word yet or) the button gets clicked, the AI generates a word
@@ -93,8 +120,9 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
 
         st.session_state["guess_counter"] = 0
         st.session_state["solved"] = False
-        st.session_state["stats"]["games_played"] += 1
+        st.session_state["stats"][word_difficulty]["games_played"] += 1
         st.session_state["word_generated"] = True
+        st.session_state["current_word_diff"] = word_difficulty
         try:
             st.write (st.session_state["word"])
         except:
@@ -146,7 +174,7 @@ with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True
 
     )
     submitted = st.form_submit_button("Submit") # TODO: same variable as above, overrides the input
-    if submitted and st.session_state["solved"] == False:
+    if submitted and st.session_state["solved"] == False and "word" in st.session_state:
         guess = guess_ungereinigt.strip().upper() # removes spaces and makes everything upper letters
 
         if guess.lower() not in nouns or len(guess) != len(st.session_state["word"]): # if the word is not an actual word or wrong length,
@@ -158,9 +186,10 @@ with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True
 
 guess_marked = []
 letter_used=[]
-# if the Submit button was pressed and the word wasn't guessed yet,
-if submitted and not st.session_state["solved"] and stop == False:
-    
+# if the Submit button was pressed and the word wasn't guessed yet, but has been generated
+if submitted and not st.session_state["solved"] and stop == False and "word" in st.session_state:
+
+
     st.session_state["guess_counter"] += 1 # increase the guess counter
 
     if st.session_state["guess_counter"] <= 6: # if the guess counter is 6 or less
@@ -200,9 +229,10 @@ if submitted and not st.session_state["solved"] and stop == False:
         if guess == st.session_state['word']:
             st.success("Yeah! You did it")
             st.balloons()
+            # first solve will be saved in "stats":
             if not st.session_state["solved"]:
-                st.session_state["stats"]["games_won"] += 1
-                st.session_state["stats"]["game_guesses"][st.session_state["guess_counter"]] += 1
+                st.session_state["stats"][st.session_state["current_word_diff"]]["games_won"] += 1
+                st.session_state["stats"][st.session_state["current_word_diff"]]["game_guesses"][st.session_state["guess_counter"]] += 1
             st.session_state["solved"] = True
             
         # del st.session_state['word']
