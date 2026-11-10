@@ -37,6 +37,8 @@ if "word_generated" not in st.session_state: # these variables should already ex
     st.session_state["word_generated"] = False
 if "solved" not in st.session_state:
     st.session_state["solved"] = False
+if "used_word" not in st.session_state:
+    st.session_state["used_word"] = []
 st.header("Wordle")
 
 # make a slider to adjust the word difficulty
@@ -53,11 +55,17 @@ with st.form("text", clear_on_submit=False, enter_to_submit=True, border=True):
         f"Enter a wordtopic"
 
     )
-    submitted = st.form_submit_button("Submit")
+
+    submitted1 = st.form_submit_button("Submit")
+   # if submitted1:
+    #    st.session_state["used_word"].append(word_topic) #used words are words not to be generated, so either words allready used or the topic itselve
+
 
 # prompt for the AI to generate a word later
-prompt = (f"Generate ONE real, existing dictionary word with the topic '{word_topic}' with exactly {wortlaenge} letters with a {word_difficulty} difficulty to guess. Output ONLY the word and nothing else.")
-
+prompt = (
+    f"Generate ONE real, existing dictionary word with the topic '{word_topic}' with exactly {wortlaenge} letters with a {word_difficulty} difficulty to guess. "
+    f"Do NOT generate any of the following previously used words: '{word_topic}', {', '.join(st.session_state['used_word'])}. Output ONLY the word and nothing else."
+)
 # create session state for the statistics if it doesn't exist already
 if "stats" not in st.session_state:
     st.session_state["stats"] = {
@@ -87,7 +95,7 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
 
             try:
                 st.session_state["word"] = resp.choices[0].message.content.strip().upper()
-            
+                st.session_state["used_word"].append(st.session_state["word"]) #list with words that were already used so AI doesnt generate same word twice
             except:
                 st.error("The AI couldn't generate a word. Please try again.")
 
