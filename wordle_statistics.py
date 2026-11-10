@@ -4,39 +4,50 @@ import numpy as np
 
 st.header("Statistics :t-rex:")
 
+if "stats" in st.session_state:
+    st.markdown("You can see all your stats for the different difficulty levels here! Just adjust the slider and see how you did in the selected difficulty:grin:")
 
-st.markdown(st.session_state["stats"])
+    word_difficulty = st.select_slider( 
+        "choose difficulty:",
+        options=["easy", "normal", "hard",],
+        value="normal")
 
-# 
-df = pd.DataFrame({
-    "Stat": ["Games", "Won"],
-    "Count": [
-        st.session_state["stats"]["games_played"],
-        st.session_state["stats"]["games_won"]
-    ]
-})
+    st.markdown(st.session_state["stats"])
 
-st.bar_chart(
-    df,
-    x="Stat",
-    y="Count"
-)
+    # 
+    df = pd.DataFrame({
+        "stat": ["Games", "Won"],
+        "Count": [
+            st.session_state["stats"][word_difficulty]["games_played"],
+            st.session_state["stats"][word_difficulty]["games_won"]
+        ]
+    })
 
-df = pd.DataFrame({
-    "Guesses": list(st.session_state["stats"]["game_guesses"].keys()),
-    "Count": list(st.session_state["stats"]["game_guesses"].values())
-})
+    st.bar_chart(
+        df,
+        x="stat",
+        y="Count"
+    )
 
-st.bar_chart(
-    df,
-    x="Guesses",
-    y="Count"
-)
+    df = pd.DataFrame({
+        "Guesses": list(st.session_state["stats"][word_difficulty]["game_guesses"].keys()),
+        "Count": list(st.session_state["stats"][word_difficulty]["game_guesses"].values())
+    })
+
+    st.bar_chart(
+        df,
+        x="Guesses",
+        y="Count"
+    )
 
 
-#values = np.array(list(game_guesses.values()))      
-#hist_values = np.histogram(values)
-#st.bar_chart(hist_values)
+    #values = np.array(list(game_guesses.values()))      
+    #hist_values = np.histogram(values)
+    #st.bar_chart(hist_values)
 
-#chart = np.histogram(st.session_state["stats"]["game_guesses"])
-#st.bar_chart(chart)
+    #chart = np.histogram(st.session_state["stats"]["game_guesses"])
+    #st.bar_chart(chart)
+
+else:
+    st.text("No data to display yet!")
+
