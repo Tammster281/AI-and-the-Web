@@ -147,7 +147,7 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
 
 # Button to get a hint
 if st.button("Hint") and st.session_state["solved"] == False and st.session_state["word_generated"] == True:
-    if st.session_state["guess_counter"] > 3: # only after a few guess should you be able to get a hint
+    if st.session_state["guess_counter"] == 5 : # only after a few guess should you be able to get a hint
         hint = f"give a riddle to guess {st.session_state['word']} without saying {st.session_state['word']}"
         try:
             with st.spinner("Answer is being created …"): # a spinner while the model is generating
@@ -168,7 +168,10 @@ if st.button("Hint") and st.session_state["solved"] == False and st.session_stat
                 "AI API request failed. Please check it and try again. "
             )
     else:
-        st.write("Come on, try a few times first!")
+        if 6 > st.session_state["guess_counter"]:
+            st.write("Come on, try a few times first! The tip is only available for your last guess.")
+        else:
+            st.write("You lost this round, no hints available!")
     for a in st.session_state["word_list"]: #the list of allready tiped words should still be shows
         st.markdown(a)
 
@@ -178,9 +181,9 @@ stop = False
 with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True):
     
     guess_ungereinigt = st.text_input(   
-        f"Enter a {wortlaenge} letter word",
-
+         f"Enter a {wortlaenge} letter word.",
     )
+
     submitted = st.form_submit_button("Submit") # TODO: same variable as above, overrides the input
     if submitted and st.session_state["solved"] == False and "word" in st.session_state:
         guess = guess_ungereinigt.strip().upper() # removes spaces and makes everything upper letters
@@ -190,6 +193,7 @@ with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True
             stop = True
             for a in st.session_state["word_list"]: # the list of already typed words should still be shown
                 st.markdown(a)
+            
 
 
 guess_marked = []
@@ -201,7 +205,7 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
     st.session_state["guess_counter"] += 1 # increase the guess counter
 
     if st.session_state["guess_counter"] <= 6: # if the guess counter is 6 or less
-        st.write(f"You submitted: {guess}") # write the submitted guessed word
+        st.write(f"You submitted: {guess}. Guesses remaining: {6-st.session_state["guess_counter"]}") # write the submitted guessed word
 
         # append a 0 into a list for every letter of the guessed word
         for i in range (len(guess)):
@@ -247,5 +251,7 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
         else:
             st.error("Oh no. The word is wrong.:dizzy_face:")
             st.info(f"Debug info: The word is {st.session_state['word']}")
+            if st.session_state["guess_counter"] == 6:
+                st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
     else:
-        st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}" + "Please generate a new word and try again.")
+        st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
