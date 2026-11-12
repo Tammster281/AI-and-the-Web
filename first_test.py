@@ -41,16 +41,20 @@ if "used_word" not in st.session_state:
     st.session_state["used_word"] = []
 st.header("Wordle")
 
+
 # make a slider to adjust the word difficulty
 # TODO: think about different input method, slider is clunky
-word_difficulty = st.select_slider( 
-    "choose word difficulty:",
-    options=["easy", "normal", "hard",],
-    value="normal")
+col, col2 = st.columns(2)
+with col:
+    word_difficulty = st.select_slider( 
+        "word difficulty:",
+        options=["easy", "normal", "hard",],
+        value="normal")
 
 
 # word length gets chosen with a slider
-wortlaenge = st.slider("Wortlänge:", min_value=3, max_value=8, value=5)
+with col2:
+    wortlaenge = st.slider("wordlength:", min_value=3, max_value=8, value=5)
 with st.form("text", clear_on_submit=False, enter_to_submit=True, border=True):
     word_topic = st.text_input(   
         f"Enter a wordtopic"
@@ -147,7 +151,7 @@ if st.button("Generate new Word") : # or "word" not in st.session_state:
 
 # Button to get a hint
 if st.button("Hint") and st.session_state["solved"] == False and st.session_state["word_generated"] == True:
-    if st.session_state["guess_counter"] > 3: # only after a few guess should you be able to get a hint
+    if st.session_state["guess_counter"] == 5 : # only after a few guess should you be able to get a hint
         hint = f"give a riddle to guess {st.session_state['word']} without saying {st.session_state['word']}"
         try:
             with st.spinner("Answer is being created …"): # a spinner while the model is generating
@@ -168,9 +172,15 @@ if st.button("Hint") and st.session_state["solved"] == False and st.session_stat
                 "AI API request failed. Please check it and try again. "
             )
     else:
-        st.write("Come on, try a few times first!")
-    for a in st.session_state["word_list"]: #the list of allready tiped words should still be shows
-        st.markdown(a)
+        if 6 > st.session_state["guess_counter"]:
+            st.write("Come on, try a few times first! The tip is only available for your last guess.")
+        else:
+            st.write("You lost this round, no hints available!")
+    for a in st.session_state["word_list"]:
+        st.markdown(
+            f"<div style='text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px;'>\n\n{a}\n\n</div>",
+            unsafe_allow_html=True
+                         )
 
 stop = False
 
@@ -178,9 +188,9 @@ stop = False
 with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True):
     
     guess_ungereinigt = st.text_input(   
-        f"Enter a {wortlaenge} letter word",
-
+         f"Enter a {wortlaenge} letter word.",
     )
+
     submitted = st.form_submit_button("Submit") # TODO: same variable as above, overrides the input
     if submitted and st.session_state["solved"] == False and "word" in st.session_state:
         guess = guess_ungereinigt.strip().upper() # removes spaces and makes everything upper letters
@@ -188,8 +198,12 @@ with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True
         if guess.lower() not in nouns or len(guess) != len(st.session_state["word"]): # if the word is not an actual word or wrong length,
             st.error("Enter valid word!:confounded:")     # it is not supposed to keep using it so stop = True
             stop = True
-            for a in st.session_state["word_list"]: # the list of already typed words should still be shown
-                st.markdown(a)
+            for a in st.session_state["word_list"]:
+                st.markdown(
+                    f"<div style='text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px;'>\n\n{a}\n\n</div>",
+                     unsafe_allow_html=True
+                     )
+
 
 
 guess_marked = []
@@ -201,7 +215,7 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
     st.session_state["guess_counter"] += 1 # increase the guess counter
 
     if st.session_state["guess_counter"] <= 6: # if the guess counter is 6 or less
-        st.write(f"You submitted: {guess}") # write the submitted guessed word
+        st.write(f"You submitted: {guess}. Guesses remaining: {6-st.session_state["guess_counter"]}") # write the submitted guessed word
 
         # append a 0 into a list for every letter of the guessed word
         for i in range (len(guess)):
@@ -232,7 +246,10 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
                     guess_marked.append(f":red[{b1}]")
         st.session_state["word_list"].append(" ".join(guess_marked))
         for a in st.session_state["word_list"]:
-            st.markdown(a)
+            st.markdown(
+                f"<div style='text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px;'>\n\n{a}\n\n</div>",
+                unsafe_allow_html=True
+                         )
 
         if guess == st.session_state['word']:
             st.success("Yeah! You did it:partying::partying:")
@@ -247,5 +264,7 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
         else:
             st.error("Oh no. The word is wrong.:dizzy_face:")
             st.info(f"Debug info: The word is {st.session_state['word']}")
+            if st.session_state["guess_counter"] == 6:
+                st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
     else:
-        st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}" + "Please generate a new word and try again.")
+        st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
