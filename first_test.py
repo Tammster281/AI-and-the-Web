@@ -38,12 +38,19 @@ if "word_generated" not in st.session_state: # these variables should already ex
 if "solved" not in st.session_state:
     st.session_state["solved"] = False
 if "used_word" not in st.session_state:
-    st.session_state["used_word"] = []
+    st.session_state["used_word"] = [] #list of words later used not to generate same word twice
+if "word_list" not in st.session_state:
+    st.session_state["word_list"]=[]
+if "hint_generated" not in st.session_state:
+    st.session_state["hint_generated"] = False
+if "no_hint_yet" not in st.session_state:
+    st.session_state["no_hint_yet"] = False #no hint is ALLOWED yet
+st.session_state["no_hint_yet" ]= False
+
 st.header("Wordle")
 
 
 # make a slider to adjust the word difficulty
-# TODO: think about different input method, slider is clunky
 col, col2 = st.columns(2)
 with col:
     word_difficulty = st.select_slider( 
@@ -55,15 +62,19 @@ with col:
 # word length gets chosen with a slider
 with col2:
     wortlaenge = st.slider("wordlength:", min_value=3, max_value=8, value=5)
-with st.form("text", clear_on_submit=False, enter_to_submit=True, border=True):
-    word_topic = st.text_input(   
-        f"Enter a wordtopic"
 
-    )
+col_, col2_, col3_ = st.columns([6.7,2.3,1], vertical_alignment="center")
+with col_:
+    with st.form("text", clear_on_submit=False, enter_to_submit=True, border=True):
+        column1, column2 = st.columns([8,2])
+        with column1:
+            word_topic = st.text_input(   
+                    "wordtopic", placeholder="Enter a wordtopic...", #the text where you have to type in wordtopic displays this
+                label_visibility="collapsed"  #makes layout more compact by removing the topic above field
 
-    submitted1 = st.form_submit_button("Submit")
-   # if submitted1:
-    #    st.session_state["used_word"].append(word_topic) #used words are words not to be generated, so either words allready used or the topic itselve
+            )
+        with column2:
+            submitted1 = st.form_submit_button("Submit")
 
 
 # prompt for the AI to generate a word later
@@ -115,94 +126,86 @@ if "stats" not in st.session_state:
 # (If there is no word yet or) the button gets clicked, the AI generates a word
 # remove the comment and the ":" in between in the "if"-line to generate the word immediately
 # TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing. See if we still need it at all.
-if st.button("Generate new Word") : # or "word" not in st.session_state: 
-    try:
-        with st.spinner("Answer is being created …"): 
-            resp = client.chat.completions.create(
-            model="Qwen/Qwen3.8-27B-FP8",
-            max_tokens=1000,
-            messages=[{"role": "user", "content": prompt}], # a spinner while the model is generating      
-                )
-
-            try:
-                st.session_state["word"] = resp.choices[0].message.content.strip().upper()
-                st.session_state["used_word"].append(st.session_state["word"]) #list with words that were already used so AI doesnt generate same word twice
-            except:
-                st.error("The AI couldn't generate a word. Please try again.")
-
-        st.session_state["guess_counter"] = 0
-        st.session_state["solved"] = False
-        st.session_state["stats"][word_difficulty]["games_played"] += 1
-        st.session_state["word_generated"] = True
-        st.session_state["current_word_diff"] = word_difficulty
+with col2_:
+    if st.button("Generate new Word") : # or "word" not in st.session_state: 
         try:
-            st.write (st.session_state["word"])
-        except:
-            st.error("No word was chosen. Please try again.")
-            st.session_state["word_generated"] = False # set the flag back to false if it failed to generate
-        st.session_state["word_list"] = [] # a list gets created in which all guesses are saved later
-    except AuthenticationError:
-        st.error("API was not accept. Please check it.")
-
-    except OpenAIError:
-        st.error(
-            "AI API request failed. Please check it and try again. "
-        )
-
-# Button to get a hint
-if st.button("Hint") and st.session_state["solved"] == False and st.session_state["word_generated"] == True:
-    if st.session_state["guess_counter"] == 5 : # only after a few guess should you be able to get a hint
-        hint = f"give a riddle to guess {st.session_state['word']} without saying {st.session_state['word']}"
-        try:
-            with st.spinner("Answer is being created …"): # a spinner while the model is generating
+            with st.spinner("Answer is being created …"): 
                 resp = client.chat.completions.create(
                 model="Qwen/Qwen3.8-27B-FP8",
                 max_tokens=1000,
-                messages=[{"role": "user", "content": hint}],    
-                        )
-                st.session_state["hint"] = resp.choices[0].message.content
-                st.write (st.session_state["hint"])
+                messages=[{"role": "user", "content": prompt}], # a spinner while the model is generating      
+                    )
 
-                        
-        except AuthenticationError: #TODO: anderer error machen
+                try:
+                    st.session_state["word"] = resp.choices[0].message.content.strip().upper() #so that the generated word uses capital letters and nothing else 
+                    st.session_state["used_word"].append(st.session_state["word"]) #list with words that were already used so AI doesnt generate same word twice
+                except:
+                    st.error("The AI couldn't generate a word. Please try again.")
+
+            st.session_state["guess_counter"] = 0
+            st.session_state["solved"] = False
+            st.session_state["stats"][word_difficulty]["games_played"] += 1
+            st.session_state["word_generated"] = True
+            st.session_state["current_word_diff"] = word_difficulty
+            st.session_state["hint_generated"] = False
+            st.session_state["no_hint_yet"] = False
+            try:
+                st.write (st.session_state["word"]) #TODO when game finished remove this
+            except:
+                st.error("No word was chosen. Please try again.")
+                st.session_state["word_generated"] = False # set the flag back to false if it failed to generate
+            st.session_state["word_list"] = [] # a list gets created in which all guesses are saved later
+        except AuthenticationError:
             st.error("API was not accept. Please check it.")
 
         except OpenAIError:
             st.error(
                 "AI API request failed. Please check it and try again. "
             )
-    else:
-        if 6 > st.session_state["guess_counter"]:
-            st.write("Come on, try a few times first! The tip is only available for your last guess.")
+with col3_:
+    # Button to get a hint only works when a word is generated and not won
+    if st.button("Hint") and st.session_state["solved"] == False and st.session_state["word_generated"] == True and st.session_state["hint_generated"] == False:
+        if st.session_state["guess_counter"] == 5 : # only after a few guess should you be able to get a hint
+            hint = f"give a riddle to guess {st.session_state['word']} without saying {st.session_state['word']}" #AI prompt
+            try:
+                with st.spinner(): # a spinner while the model is generating
+                    resp = client.chat.completions.create(
+                    model="Qwen/Qwen3.8-27B-FP8",
+                    max_tokens=1000,
+                    messages=[{"role": "user", "content": hint}],    
+                            )
+                    st.session_state["hint"] = resp.choices[0].message.content
+                    st.session_state["hint_generated"] = True
+
+                            
+            except AuthenticationError: #TODO: anderer error machen
+                st.error("API was not accept. Please check it.")
+
+            except OpenAIError:
+                st.error(
+                    "AI API request failed. Please check it and try again. "
+                )
         else:
-            st.write("You lost this round, no hints available!")
-    for a in st.session_state["word_list"]:
-        st.markdown(
-            f"<div style='text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px;'>\n\n{a}\n\n</div>",
-            unsafe_allow_html=True
-                         )
+            st.session_state["no_hint_yet"] = True
+
 
 stop = False
 
 # TODO: add comments
 with st.form("textform", clear_on_submit=True, enter_to_submit=True, border=True):
     
-    guess_ungereinigt = st.text_input(   
+    guess_ungereinigt = st.text_input(   #the guess can be submitted
          f"Enter a {wortlaenge} letter word.",
     )
 
-    submitted = st.form_submit_button("Submit") # TODO: same variable as above, overrides the input
-    if submitted and st.session_state["solved"] == False and "word" in st.session_state:
+    submitted = st.form_submit_button("Submit") 
+    if submitted and st.session_state["solved"] == False and "word" in st.session_state: #when a word was submitted, and one is generated by ai
         guess = guess_ungereinigt.strip().upper() # removes spaces and makes everything upper letters
 
         if guess.lower() not in nouns or len(guess) != len(st.session_state["word"]): # if the word is not an actual word or wrong length,
-            st.error("Enter valid word!:confounded:")     # it is not supposed to keep using it so stop = True
+            st.error("Enter valid word!:confounded:")                                 # it is not supposed to keep using it so stop = True
             stop = True
-            for a in st.session_state["word_list"]:
-                st.markdown(
-                    f"<div style='text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px;'>\n\n{a}\n\n</div>",
-                     unsafe_allow_html=True
-                     )
+
 
 
 
@@ -245,11 +248,6 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
                 if not l_found:
                     guess_marked.append(f":red[{b1}]")
         st.session_state["word_list"].append(" ".join(guess_marked))
-        for a in st.session_state["word_list"]:
-            st.markdown(
-                f"<div style='text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px;'>\n\n{a}\n\n</div>",
-                unsafe_allow_html=True
-                         )
 
         if guess == st.session_state['word']:
             st.success("Yeah! You did it:partying::partying:")
@@ -268,3 +266,17 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
                 st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
     else:
         st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
+
+if st.session_state["no_hint_yet"] == True: #if no hint is allowed yet
+    if 6 > st.session_state["guess_counter"]: #TODO is das doppelt gemoppelt????
+        st.write("Come on, try a few times first! The tip is only available for your last guess.")
+    else:
+        st.write("You lost this round, no hints available!")
+if st.session_state["hint_generated"] == True:
+    st.write (st.session_state["hint"])
+
+for a in st.session_state["word_list"]: #the wordlist should outputed in a different design
+    st.markdown(
+                    f"<div style='text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px;'>\n\n{a}\n\n</div>",
+                     unsafe_allow_html=True
+                     )
