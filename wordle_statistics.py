@@ -14,51 +14,31 @@ if "stats" in st.session_state:
 
     st.markdown(st.session_state["stats"])
 
-    if st.session_state["stats"][word_difficulty]["games_played"] != 0:
-        df = pd.DataFrame({
-            "stat": ["Games", "Won"],
-            "Count": [
-                st.session_state["stats"][word_difficulty]["games_played"],
-                st.session_state["stats"][word_difficulty]["games_won"]
-            ]
-        })
+    # 
+    df = pd.DataFrame({
+        "stat": ["Games", "Won"],
+        "Count": [
+            st.session_state["stats"][word_difficulty]["games_played"],
+            st.session_state["stats"][word_difficulty]["games_won"]
+        ]
+    })
 
-        st.bar_chart(
-            df,
-            x="stat",
-            y="Count"
-        )
-        
-        
-        df = pd.DataFrame({
-            "Guesses": list(st.session_state["stats"][word_difficulty]["game_guesses"].keys()),
-            "Count": list(st.session_state["stats"][word_difficulty]["game_guesses"].values())
-        })
+    st.bar_chart(
+        df,
+        x="stat",
+        y="Count"
+    )
 
-        avg = (df["Guesses"] * df["Count"]).sum() / df["Count"].sum()
-        st.info(f"You take on average {avg} guesses!:smiling_face_with_three_hearts:")
+    df = pd.DataFrame({
+        "Guesses": list(st.session_state["stats"][word_difficulty]["game_guesses"].keys()),
+        "Count": list(st.session_state["stats"][word_difficulty]["game_guesses"].values())
+    })
 
-
-        st.bar_chart(
-            df,
-            x="Guesses",
-            y="Count"
-        )
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-    
+    st.bar_chart(
+        df,
+        x="Guesses",
+        y="Count"
+    )
 
 
     #values = np.array(list(game_guesses.values()))      
