@@ -166,7 +166,7 @@ with col3_:
     # Button to get a hint only works when a word is generated and not won
     if st.button("Hint") and st.session_state["solved"] == False and st.session_state["word_generated"] == True and st.session_state["hint_generated"] == False:
         if st.session_state["guess_counter"] == 5 : # only after a few guess should you be able to get a hint
-            hint = f"give a riddle to guess {st.session_state['word']} without saying {st.session_state['word']}" #AI prompt
+            hint = f"give a riddle to guess {st.session_state['word']} without saying {st.session_state['word']}. Make sure that it actually rhymes." #AI prompt
             try:
                 with st.spinner(): # a spinner while the model is generating
                     resp = client.chat.completions.create(
