@@ -14,39 +14,38 @@ if "stats" in st.session_state:
 
     st.markdown(st.session_state["stats"])
 
-    # 
-    df = pd.DataFrame({
-        "stat": ["Games", "Won"],
-        "Count": [
-            st.session_state["stats"][word_difficulty]["games_played"],
-            st.session_state["stats"][word_difficulty]["games_won"]
-        ]
-    })
+    if st.session_state["stats"][word_difficulty]["games_played"] != 0:
+        df = pd.DataFrame({
+            "stat": ["Games", "Won"],
+            "Count": [
+                st.session_state["stats"][word_difficulty]["games_played"],
+                st.session_state["stats"][word_difficulty]["games_won"]
+            ]
+        })
 
-    st.bar_chart(
-        df,
-        x="stat",
-        y="Count"
-    )
+        st.bar_chart(
+            df,
+            x="stat",
+            y="Count"
+        )
+        
+        if st.session_state["stats"][word_difficulty]["games_won"] != 0:
 
-    df = pd.DataFrame({
-        "Guesses": list(st.session_state["stats"][word_difficulty]["game_guesses"].keys()),
-        "Count": list(st.session_state["stats"][word_difficulty]["game_guesses"].values())
-    })
+            df = pd.DataFrame({
+                "Guesses": list(st.session_state["stats"][word_difficulty]["game_guesses"].keys()),
+                "Count": list(st.session_state["stats"][word_difficulty]["game_guesses"].values())
+            })
 
-    st.bar_chart(
-        df,
-        x="Guesses",
-        y="Count"
-    )
+            avg = (df["Guesses"] * df["Count"]).sum() / df["Count"].sum()
+            st.info(f"You take on average {avg} guesses!:smiling_face_with_three_hearts:")
 
 
-    #values = np.array(list(game_guesses.values()))      
-    #hist_values = np.histogram(values)
-    #st.bar_chart(hist_values)
+            st.bar_chart(
+                df,
+                x="Guesses",
+                y="Count"
+            )
 
-    #chart = np.histogram(st.session_state["stats"]["game_guesses"])
-    #st.bar_chart(chart)
 
 else:
     st.text("No data to display yet!")

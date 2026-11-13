@@ -194,6 +194,8 @@ with col3_:
             
         else:
             st.session_state["no_hint_yet"] = True
+    else:
+        st.info("No hint available!")
 
 
 stop = False
