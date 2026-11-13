@@ -128,6 +128,7 @@ if "stats" not in st.session_state:
 # TODO: handle problems arising from not generating the word immediately IF we keep it commented out. Maybe set default word for testing. See if we still need it at all.
 with col2_:
     if st.button("Generate new Word") : # or "word" not in st.session_state: 
+        st.session_state["hint_displayed"] = False
         try:
             with st.spinner("Answer is being created …"): 
                 resp = client.chat.completions.create(
@@ -173,7 +174,7 @@ with col2_:
             #with st.spinner("Hint is being generated..."): # a spinner while the model is generating
             resp = client.chat.completions.create(
             model="Qwen/Qwen3.8-27B-FP8",
-            max_tokens=1000,
+            max_tokens=4000,
             messages=[{"role": "user", "content": hint}],    
             )
             st.session_state["hint"] = resp.choices[0].message.content
