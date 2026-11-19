@@ -161,7 +161,7 @@ with col2_:
         
         # API error handling
         except AuthenticationError:
-            st.error("API was not accept. Please check it.")
+            st.error("API was not accepted. Please check it.")
 
         except OpenAIError:
             st.error(
