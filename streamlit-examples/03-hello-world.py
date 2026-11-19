@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.header("Hello, world!")
+st.header("Hello, worlsdfsdhdfsd!")
 st.subheader("This is the subheader")
 st.write("This a normal text paragraph.")
 
@@ -11,4 +11,4 @@ if rating:
     st.subheader("Rating")
     st.write(f"Rating is {rating}")
 
-# st.balloons()
+st.balloons()

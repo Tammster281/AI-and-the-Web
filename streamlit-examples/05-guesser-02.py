@@ -10,8 +10,8 @@ with st.form("number_form"):
         "Enter a number",
         min_value=0,
         max_value=100,
-        value=10,
-        step=1,
+        value=20,
+        step=5,
     )
     submitted = st.form_submit_button("Submit")
 
