@@ -15,13 +15,13 @@ if "stats" in st.session_state:
         value="normal")
 
 
-    st.markdown(st.session_state["stats"])
+    #st.markdown(st.session_state["stats"])
 
     # only display graphs if there is data to display:
     if st.session_state["stats"][word_difficulty]["games_played"] != 0:
         # save stats data for graph generation
         df = pd.DataFrame({
-            "stat": ["Games", "Won"],
+            "Games won": ["Games", "Won"],
             "Count": [
                 st.session_state["stats"][word_difficulty]["games_played"],
                 st.session_state["stats"][word_difficulty]["games_won"]
@@ -30,7 +30,7 @@ if "stats" in st.session_state:
         # show graph
         st.bar_chart(
             df,
-            x="stat",
+            x="Games won",
             y="Count"
         )
 
