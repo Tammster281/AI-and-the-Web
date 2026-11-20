@@ -5,11 +5,8 @@ from openai import OpenAI, AuthenticationError, OpenAIError
 #import numpy as np
 import json
 
-# JSON-Datei laden
-#with open('2of12id.json', 'r') as file:
- #   official_words = json.load(file)['N']
 
-# JSON-Datei laden
+# JSON-Datei with real words
 with open('2of12id.json', 'r') as file:
     official_words = [word for category in json.load(file).values() for word in category]
 
@@ -47,7 +44,7 @@ if "word_list" not in st.session_state:
 if "hint_displayed" not in st.session_state:
     st.session_state["hint_displayed"] = False
 if "no_hint_yet" not in st.session_state:
-    st.session_state["no_hint_yet"] = False #no hint is ALLOWED yet
+    st.session_state["no_hint_yet"] = False #no hint is ALLOWED yet if not_hint_yes is false 
 st.session_state["no_hint_yet" ]= False # the "no hint yet" message should not be displayed yet before requesting a hint
 
 
@@ -269,7 +266,9 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
 
         # was the word guessed correctly?
         if guess == st.session_state['word']:
-            st.success("Yeah! You did it:partying::partying:")
+            st.success("Yeah! You did it!:partying::partying: "
+                       "Generate a new word to keep playing!"
+            )
             st.balloons()
             # first solve will be saved in "stats":
             if not st.session_state["solved"]:
@@ -283,13 +282,13 @@ if submitted and not st.session_state["solved"] and stop == False and "word" in 
             if st.session_state["guess_counter"] == 6:
                 st.error("Oh no. The word is wrong.:dizzy_face:")
                 #st.info(f"Debug info: The word is {st.session_state['word']}")
-                st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
+                st.error("You have used up all your guesses:sob:. " +f" The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
     else:
         st.error("You have used up all your guesses:sob:. " +f"Debug info: The word was {st.session_state['word']}. " + "Please generate a new word and try again.")
 
 if st.session_state["no_hint_yet"] == True: #if no hint is allowed yet
     if 6 > st.session_state["guess_counter"]:
-        st.toast("Come on, try a few times first! The tip is only available for your last guess.")
+        st.toast("Come on, try a few times first! The hint is only available for your last guess.")
     else:
         st.write("You lost this round, no hints available!")
 # displays the hint. If the AI failed to generate one, inform the user
